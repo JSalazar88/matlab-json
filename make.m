@@ -16,7 +16,7 @@ if nargin > 0 && strcmpi(varargin{1},'clean')
   
 else
   
-  mex json_decode.c jsmn.c
-  mex json_encode.c
+  mex json_decode.cpp jsmn.cpp
+  mex json_encode.cpp
   
 end
