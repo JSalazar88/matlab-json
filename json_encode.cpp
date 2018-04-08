@@ -43,11 +43,11 @@ void error_unsupported_class(const mxArray *obj) {
 
 void json_str_realloc() {
   json_strlen += BUFFER_SIZE;
-  json_str = mxRealloc(json_str,json_strlen);
+  json_str = (char*)mxRealloc(json_str,json_strlen);
   if (json_str == NULL) error(ERROR_MALLOC);
 }
 
-void json_append_char(c) {
+void json_append_char(char c) {
   if (json_strlen-json_strpos < 2) json_str_realloc();
   json_str[json_strpos++] = c;
 }
@@ -90,7 +90,7 @@ void json_encode_item(const mxArray *obj) {
   int64_t *int64_ptr;
   unsigned int i, n;
   
-  n = mxGetNumberOfElements(obj);
+  n = (unsigned int)mxGetNumberOfElements(obj);
   
   if (mxIsChar(obj)) {
     
@@ -163,7 +163,7 @@ void json_encode_item(const mxArray *obj) {
         break;
         
       case mxLOGICAL_CLASS:
-        logical_ptr = mxGetData(obj);
+        logical_ptr = (mxLogical *)mxGetData(obj);
         for (i=0; i<n; i++) {
           if (logical_ptr[i]) {
             json_append_string("true,");
@@ -174,7 +174,7 @@ void json_encode_item(const mxArray *obj) {
         break;
         
       case mxDOUBLE_CLASS:
-        double_ptr = mxGetData(obj);
+        double_ptr = (double *)mxGetData(obj);
         for (i=0; i<n; i++) {
           if (mxIsNaN(double_ptr[i])) json_append_string("null,");
           else json_append_number("%.16g,",double_ptr[i]);
@@ -182,7 +182,7 @@ void json_encode_item(const mxArray *obj) {
         break;
         
       case mxSINGLE_CLASS:
-        single_ptr = mxGetData(obj);
+        single_ptr = (float *)mxGetData(obj);
         for (i=0; i<n; i++) {
           if (mxIsNaN(single_ptr[i])) json_append_string("null,");
           else json_append_number("%.16g,",single_ptr[i]);
@@ -190,42 +190,42 @@ void json_encode_item(const mxArray *obj) {
         break;
         
       case mxINT8_CLASS:
-        int8_ptr = mxGetData(obj);
+        int8_ptr = (int8_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%i,",int8_ptr[i]);
         break;
         
       case mxUINT8_CLASS:
-        uint8_ptr = mxGetData(obj);
+        uint8_ptr = (uint8_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%u,",uint8_ptr[i]);
         break;
         
       case mxINT16_CLASS:
-        int16_ptr = mxGetData(obj);
+        int16_ptr = (int16_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%i,",int16_ptr[i]);
         break;
         
       case mxUINT16_CLASS:
-        uint16_ptr = mxGetData(obj);
+        uint16_ptr = (uint16_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%u,",uint16_ptr[i]);
         break;
         
       case mxINT32_CLASS:
-        int32_ptr = mxGetData(obj);
+        int32_ptr = (int32_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%i,",int32_ptr[i]);
         break;
         
       case mxUINT32_CLASS:
-        uint32_ptr = mxGetData(obj);
+        uint32_ptr = (uint32_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%u,",uint32_ptr[i]);
         break;
         
       case mxINT64_CLASS:
-        int64_ptr = mxGetData(obj);
+        int64_ptr = (int64_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%lli,",int64_ptr[i]);
         break;
         
       case mxUINT64_CLASS:
-        uint64_ptr = mxGetData(obj);
+        uint64_ptr = (uint64_t *)mxGetData(obj);
         for (i=0; i<n; i++) json_append_number("%llu,",uint64_ptr[i]);
         break;
         
@@ -246,7 +246,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (nrhs < 1) error(ERROR_MINRHS);
   if (nrhs > 1) error(ERROR_MAXRHS);
   
-  json_str = mxMalloc(BUFFER_SIZE);
+  json_str = (char *)mxMalloc(BUFFER_SIZE);
   if (json_str == NULL) error(ERROR_MALLOC);
   json_strlen = BUFFER_SIZE;
   json_strpos = 0;

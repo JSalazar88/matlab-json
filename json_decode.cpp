@@ -52,7 +52,7 @@ void error_parse(const unsigned int character) {
 
 char *json_get_string(jsmntok_t *t) {
   
-  char *str = mxMalloc(t->end-t->start+1);
+  char *str = (char*) mxMalloc(t->end-t->start+1);
   if (str == NULL) error(ERROR_MALLOC);
   
   memcpy(str,&json_str[t->start],t->end-t->start);
@@ -76,7 +76,7 @@ unsigned int json_parse_item(jsmntok_t *t, mxArray **obj) {
     
     case JSMN_OBJECT:
       *obj = mxCreateStructMatrix(1,1,0,NULL);
-      for (i=j=0; i<t->size; i++) {
+      for (i=j=0; i < (unsigned int) t->size; i++) {
         str = json_get_string(t+1+j++);
         j += json_parse_item(t+1+j,&item);
         mxAddField(*obj,str);
@@ -86,8 +86,8 @@ unsigned int json_parse_item(jsmntok_t *t, mxArray **obj) {
       return j+1;
       
     case JSMN_ARRAY:
-      array = mxMalloc(t->size*sizeof(mxArray*));
-      for (i=j=0; i<t->size; i++) {
+      array = (mxArray **)mxMalloc(t->size*sizeof(mxArray*));
+      for (i=j=0; i<(unsigned int) t->size; i++) {
         j += json_parse_item(t+1+j,&array[i]);
         cat &= (mxGetNumberOfElements(array[i]) == 1);
         if (i == 0) {
@@ -98,10 +98,10 @@ unsigned int json_parse_item(jsmntok_t *t, mxArray **obj) {
         }
       }
       if (cat && (mexCallMATLABWithTrap(1,obj,t->size,array,"horzcat") == NULL)) {
-        for (i=0; i<t->size; i++) mxDestroyArray(array[i]);
+        for (i=0; i < (unsigned int)t->size; i++) mxDestroyArray(array[i]);
       } else {
         *obj = mxCreateCellMatrix(1,t->size);
-        for (i=0; i<t->size; i++) mxSetCell(*obj,i,array[i]);
+        for (i=0; i < (unsigned int)t->size; i++) mxSetCell(*obj,i,array[i]);
       }
       mxFree(array);
       return j+1;
@@ -110,8 +110,8 @@ unsigned int json_parse_item(jsmntok_t *t, mxArray **obj) {
       str = json_get_string(t);
       if ((str[0] != 't') && (str[0] != 'f') && (str[0] != 'n')) {
         *obj = mxCreateDoubleMatrix(1,1,mxREAL);
-        double *value = mxGetData(*obj);
-        sscanf(str,"%lg",value);
+		double *value = (double*)mxGetData(*obj);
+        sscanf(str,"%lg", value);
       } else if (strcmp(str,"true") == 0) {
         *obj = mxCreateLogicalScalar(1);
       } else if (strcmp(str,"false") == 0) {
@@ -128,7 +128,7 @@ unsigned int json_parse_item(jsmntok_t *t, mxArray **obj) {
       n[1] = t->end-t->start;
       *obj = mxCreateCharArray(2,n);
       chars = mxGetChars(*obj);
-      for (i=t->start,j=0; i<t->end; i++) {
+      for (i=t->start,j=0; i < (unsigned int)t->end; i++) {
         /* decode escaped characters */
         if (json_str[i] == '\\') {
           if (json_str[i+1] == 'u') {
@@ -187,7 +187,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   /* allocate some tokens as a start */
   jsmntok_t *t;
   size_t n = 256;
-  t = mxMalloc(n*sizeof(jsmntok_t));
+  t = (jsmntok_t *)mxMalloc(n*sizeof(jsmntok_t));
   if (t == NULL) error(ERROR_MALLOC);
   
   int r;
@@ -195,7 +195,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     r = jsmn_parse(&p,json_str,json_strlen,t,n);
     if (r != JSMN_ERROR_NOMEM) break;
     n *= 2;
-    t = mxRealloc(t,n*sizeof(jsmntok_t));
+    t = (jsmntok_t*)mxRealloc(t,n*sizeof(jsmntok_t));
     if (t == NULL) error(ERROR_MALLOC);
   }
   

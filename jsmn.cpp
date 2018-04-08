@@ -64,7 +64,7 @@ static jsmnerr_t jsmn_parse_primitive(jsmn_parser *parser, const char *js,
   found:
     if (tokens == NULL) {
       parser->pos--;
-      return 0;
+      return (jsmnerr_t)0;
     }
     token = jsmn_alloc_token(parser, tokens, num_tokens);
     if (token == NULL) {
@@ -76,7 +76,7 @@ static jsmnerr_t jsmn_parse_primitive(jsmn_parser *parser, const char *js,
     token->parent = parser->toksuper;
 #endif
     parser->pos--;
-    return 0;
+    return (jsmnerr_t)0;
 }
 
 /**
@@ -97,7 +97,7 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
     /* Quote: end of string */
     if (c == '\"') {
       if (tokens == NULL) {
-        return 0;
+        return (jsmnerr_t)0;
       }
       token = jsmn_alloc_token(parser, tokens, num_tokens);
       if (token == NULL) {
@@ -108,7 +108,7 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 #ifdef JSMN_PARENT_LINKS
       token->parent = parser->toksuper;
 #endif
-      return 0;
+      return (jsmnerr_t)0;
     }
     
     /* Backslash: Quoted symbol expected */
@@ -295,7 +295,7 @@ jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
     }
   }
   
-  return count;
+  return (jsmnerr_t)count;
 }
 
 /**
